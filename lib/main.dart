@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:ellenox_hackathon/currentLocation.dart';
 import 'package:ellenox_hackathon/mapview.dart';
+import 'package:ellenox_hackathon/traffic.dart';
 import 'package:ellenox_hackathon/weather_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Bot',
-      home: RouteMap(
+      home: TrafficFlowPage(
       ),
     );
   }
