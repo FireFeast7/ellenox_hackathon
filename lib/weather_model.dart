@@ -66,4 +66,24 @@ class WeatherData {
       cityName: json['name'],
     );
   }
+  Map<String, dynamic> toMap() {
+    return {
+      'cityName': cityName,
+      'temp': temp,
+      'feelsLike': feelsLike,
+      'tempMin': tempMin,
+      'tempMax': tempMax,
+      'weatherMain': weatherMain,
+      'weatherDescription': weatherDescription,
+      'pressure': pressure,
+      'humidity': humidity,
+      'visibility': visibility,
+      'windSpeed': windSpeed,
+      'windDeg': windDeg,
+      'windGust': windGust,
+      'cloudiness': cloudiness,
+      'sunrise': sunrise,
+      'sunset': sunset,
+    };
+  }
 }

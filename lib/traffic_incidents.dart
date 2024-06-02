@@ -3,9 +3,35 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TrafficIncidentPage extends StatelessWidget {
+  Future<Map<String, dynamic>> fetchTrafficIncidentData() async {
+    final String url =
+        "https://data.traffic.hereapi.com/v7/incidents?locationReferencing=shape&in=circle:51.50643,-0.12719;r=100&apiKey=LDqTvoCf_-jBLRKJaQgdldgPolbOf4Tj4cKM17Nt3BU";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load traffic incident data');
+      }
+    } catch (error) {
+      throw Exception('Error: $error');
+    }
+  }
+
+  Map<String, dynamic> map = {};
   Future<List<Incident>> fetchIncidents() async {
     final data = await fetchTrafficIncidentData();
     final List<dynamic> results = data['results'];
+    final incidents = results.map((json) => Incident.fromJson(json)).toList();
+    final Map<String, Map<String, dynamic>> incidentMaps = {
+      for (var incident in incidents) incident.id: incident.toMap()
+    };
+
+    final jsonString = jsonEncode(incidentMaps);
+
+    print(jsonString);
     return results.map((json) => Incident.fromJson(json)).toList();
   }
 
@@ -97,21 +123,16 @@ class Incident {
       endTime: DateTime.parse(json['incidentDetails']['endTime']),
     );
   }
-}
-
-Future<Map<String, dynamic>> fetchTrafficIncidentData() async {
-  final String url =
-      "https://data.traffic.hereapi.com/v7/incidents?locationReferencing=shape&in=circle:51.50643,-0.12719;r=100&apiKey=LDqTvoCf_-jBLRKJaQgdldgPolbOf4Tj4cKM17Nt3BU";
-
-  try {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load traffic incident data');
-    }
-  } catch (error) {
-    throw Exception('Error: $error');
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'description': description,
+      'summary': summary,
+      'type': type,
+      'criticality': criticality,
+      'roadClosed': roadClosed,
+      'startTime': startTime.toIso8601String(),
+      'endTime': endTime.toIso8601String(),
+    };
   }
 }

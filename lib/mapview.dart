@@ -5,9 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RouteMap extends StatefulWidget {
-  RouteMap({
-    Key? key,
-  }) : super(key: key);
+  final List<double> coordinates;
+  RouteMap({super.key, required this.coordinates});
 
   @override
   State<RouteMap> createState() => _RouteMapState();
@@ -15,7 +14,7 @@ class RouteMap extends StatefulWidget {
 
 class _RouteMapState extends State<RouteMap> {
   late Future<List<List<double>>> _routeCoordinatesFuture;
-
+  late LatLng latLng;
   @override
   void initState() {
     super.initState();
@@ -23,8 +22,18 @@ class _RouteMapState extends State<RouteMap> {
   }
 
   Future<List<List<double>>> fetchRouteCoordinates() async {
+    // Ensure the coordinates list has pairs of latitude and longitude
+    assert(widget.coordinates.length % 2 == 0);
+
+    // Build the stops string
+    List<String> stops = [];
+    for (int i = 0; i < widget.coordinates.length; i += 2) {
+      stops.add("${widget.coordinates[i]}%2C${widget.coordinates[i + 1]}");
+    }
+    final String stopsString = stops.join('%3B');
+    print(stopsString);
     final String uri =
-        "https://trueway-directions2.p.rapidapi.com/FindDrivingRoute?stops=19.0760%2C72.8777%3B18.5204%2C73.8567";
+        "https://trueway-directions2.p.rapidapi.com/FindDrivingRoute?stops=$stopsString";
 
     final Map<String, String> headers = {
       'x-rapidapi-key': "ec9e433778msh32261a3977361bbp1372abjsn997471d1a0ca",
@@ -49,11 +58,11 @@ class _RouteMapState extends State<RouteMap> {
         return routeCoordinates;
       } else {
         print('Error: ${response.statusCode}');
-        return []; // Return an empty list in case of error
+        return [];
       }
     } catch (error) {
       print('Error: $error');
-      return []; // Return an empty list in case of error
+      return [];
     }
   }
 
@@ -72,10 +81,19 @@ class _RouteMapState extends State<RouteMap> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             final routeCoordinates = snapshot.data!;
+            double avgLat = 0.0;
+            double avgLng = 0.0;
+            for (var coord in routeCoordinates) {
+              avgLat += coord[0];
+              avgLng += coord[1];
+            }
+            avgLat /= routeCoordinates.length;
+            avgLng /= routeCoordinates.length;
+            latLng = LatLng(avgLat, avgLng);
             return FlutterMap(
               options: MapOptions(
-                center: LatLng(38.0, -97.0), // Center of the map
-                zoom: 5.0, // Initial zoom level
+                center: latLng,
+                zoom: 8.0,
               ),
               children: [
                 TileLayer(
