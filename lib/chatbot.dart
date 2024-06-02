@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:ellenox_hackathon/button_row_model.dart';
 import 'package:ellenox_hackathon/currentLocation.dart';
-import 'package:ellenox_hackathon/mapview.dart';
+import 'package:ellenox_hackathon/message_container_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
@@ -18,6 +19,7 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> messages = [];
   bool showButtons = false;
   List<double> coordinates = [];
+  String cityName = '';
 
   @override
   void initState() {
@@ -111,6 +113,9 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+   
+
+
 
   void sendMessage(String text) async {
     if (text.isEmpty) return;
@@ -120,7 +125,7 @@ class _HomeState extends State<Home> {
         'text': text,
         'isUserMessage': true,
       });
-      showButtons = false; // Reset button visibility
+      showButtons = false;
     });
 
     Map<String, dynamic> coord = await getCurrentLocation();
@@ -135,8 +140,25 @@ class _HomeState extends State<Home> {
     if (response.statusCode == 200) {
       var responseBody = jsonDecode(response.body);
       var resultCode = responseBody['result'][0];
+      if (resultCode == 1) {
+      var resultString = responseBody['result'][1];
+      var cityMatches = RegExp(r'\"null\", \"(.*?)\"').allMatches(resultString);
+      if (cityMatches.isNotEmpty) {
+        cityName = cityMatches.first.group(1)!;
+            coordinates = responseBody['result'][2].cast<double>();
 
-      if (resultCode == 2) {
+    setState(() {
+          addMessage({
+            'text':
+                'These are the results that I found for your query to travel to $cityName ',
+            'isUserMessage': false,
+          });
+          showButtons = true;
+        });
+  }
+}
+
+      else if (resultCode == 2) {
         var weatherData = WeatherData.fromJson(responseBody['result'][2]);
         setState(() {
           addMessage({
@@ -145,35 +167,46 @@ class _HomeState extends State<Home> {
             'isWeatherMessage': true,
           });
         });
-      } else {
-        var replyText = responseBody['result'][1];
-        print(response.body);
-        final Map<String, dynamic> jsonData = jsonDecode(response.body);
-        coordinates = jsonData['result'][2].cast<double>();
 
+        var jsonString = formatWeatherDataAsJsonString(weatherData);
+        var summarizeResponse = await http.post(
+          Uri.parse('https://travelbot-summarizer.onrender.com/weather'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonString,
+        );
+
+        if (summarizeResponse.statusCode == 200) {
+          var summarizeResponseBody = jsonDecode(summarizeResponse.body);
+          setState(() {
+            addMessage({
+              'text': summarizeResponseBody['summary'],
+              'isUserMessage': false,
+            });
+          });
+        } else {
+          print(
+              'Failed to summarize weather data: ${summarizeResponse.statusCode}');
+        }
+      } else {
+        print(response.body);
         setState(() {
           addMessage({
-            'text': replyText,
+            'text':
+                response.body,
             'isUserMessage': false,
           });
-          showButtons = true;
+
         });
       }
+    } else {
+      print('Failed to fetch weather data: ${response.statusCode}');
     }
   }
 
   String formatWeatherData(WeatherData weatherData) {
-    String formatTime(int timestamp) {
-      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)
-          .toLocal()
-          .toIso8601String()
-          .split('T')[1]
-          .substring(0, 5);
-    }
+    
 
-    String formatTemperature(double value) {
-      return (value - 273.15).toStringAsFixed(2);
-    }
+    
 
     final Map<String, dynamic> formattedData = {
       'City': weatherData.cityName,
@@ -215,6 +248,38 @@ class _HomeState extends State<Home> {
     Sunrise: ${formatTime(weatherData.sunrise)},
     Sunset: ${formatTime(weatherData.sunset)},
     ''';
+  }
+
+String formatTemperature(double value) {
+      return (value - 273.15).toStringAsFixed(2);
+    }
+    String formatTime(int timestamp) {
+      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)
+          .toLocal()
+          .toIso8601String()
+          .split('T')[1]
+          .substring(0, 5);
+    }
+  String formatWeatherDataAsJsonString(WeatherData weatherData) {
+    final Map<String, dynamic> formattedData = {
+      'City': weatherData.cityName,
+      'Temperature': formatTemperature(weatherData.temp),
+      'Feels Like': formatTemperature(weatherData.feelsLike),
+      'Min Temperature': formatTemperature(weatherData.tempMin),
+      'Max Temperature': formatTemperature(weatherData.tempMax),
+      'Weather': weatherData.weatherMain,
+      'Pressure': weatherData.pressure,
+      'Humidity': weatherData.humidity,
+      'Visibility': weatherData.visibility,
+      'Wind Speed': weatherData.windSpeed,
+      'Wind Degree': weatherData.windDeg,
+      'Wind Gust': weatherData.windGust,
+      'Cloudiness': weatherData.cloudiness,
+      'Sunrise': formatTime(weatherData.sunrise),
+      'Sunset': formatTime(weatherData.sunset),
+    };
+
+    return jsonEncode(formattedData);
   }
 
   void addMessage(Map<String, dynamic> message) {
@@ -261,7 +326,7 @@ class _BodyState extends State<Body> {
                     : MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _MessageContainer(
+                  MessageContainer(
                     text: obj['text'],
                     isUserMessage: isUserMessage,
                     isWeatherMessage: isWeatherMessage,
@@ -281,83 +346,9 @@ class _BodyState extends State<Body> {
         if (widget.showButtons)
           ButtonRow(
             coordinates: widget.coordinates,
+            
           ),
       ],
-    );
-  }
-}
-
-class _MessageContainer extends StatelessWidget {
-  final String text;
-  final bool isUserMessage;
-  final bool isWeatherMessage;
-
-  const _MessageContainer({
-    Key? key,
-    required this.text,
-    this.isUserMessage = false,
-    this.isWeatherMessage = false,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    List<String> lines = text.split(',');
-
-    return Container(
-      constraints: BoxConstraints(maxWidth: 250),
-      child: LayoutBuilder(
-        builder: (context, constrains) {
-          return Container(
-            decoration: BoxDecoration(
-              color: isUserMessage ? Colors.blue : Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: lines.map((line) => Text(line)).toList(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ButtonRow extends StatelessWidget {
-  final List<double> coordinates;
-
-  const ButtonRow({Key? key, required this.coordinates}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => RouteMap(coordinates: coordinates),
-                ),
-              );
-            },
-            child: Text('Check Maps'),
-          ),
-          SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text('Get Traffic Information'),
-          ),
-          SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text('Get Incidents Information'),
-          ),
-        ],
-      ),
     );
   }
 }

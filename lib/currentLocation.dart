@@ -13,7 +13,7 @@ Future<Map<String, dynamic>> getCurrentLocation() async {
         'lon': data['lon'],
         'city': data['city'],
       };
-      print('Location Data: $locationData'); // Log the location data
+      print('Location Data: $locationData'); 
 
       return {
         'lat': data['lat'],
@@ -90,3 +90,5 @@ Future<List<List<double>>> fetchRouteCoordinates() async {
     return []; // Return an empty list in case of error
   }
 }
+
+

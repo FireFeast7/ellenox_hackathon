@@ -22,10 +22,8 @@ class _RouteMapState extends State<RouteMap> {
   }
 
   Future<List<List<double>>> fetchRouteCoordinates() async {
-    // Ensure the coordinates list has pairs of latitude and longitude
     assert(widget.coordinates.length % 2 == 0);
 
-    // Build the stops string
     List<String> stops = [];
     for (int i = 0; i < widget.coordinates.length; i += 2) {
       stops.add("${widget.coordinates[i]}%2C${widget.coordinates[i + 1]}");
@@ -107,8 +105,8 @@ class _RouteMapState extends State<RouteMap> {
                       points: routeCoordinates
                           .map((coord) => LatLng(coord[0], coord[1]))
                           .toList(),
-                      color: Colors.black, // Route color
-                      strokeWidth: 2.0, // Route width
+                      color: Colors.black, 
+                      strokeWidth: 2.0, 
                     ),
                   ],
                 )

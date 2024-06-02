@@ -1,8 +1,17 @@
+import 'package:ellenox_hackathon/incident_model.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class TrafficIncidentPage extends StatelessWidget {
+class TrafficIncidentPage extends StatefulWidget {
+  @override
+  State<TrafficIncidentPage> createState() => _TrafficIncidentPageState();
+}
+
+class _TrafficIncidentPageState extends State<TrafficIncidentPage> {
   Future<Map<String, dynamic>> fetchTrafficIncidentData() async {
     final String url =
         "https://data.traffic.hereapi.com/v7/incidents?locationReferencing=shape&in=circle:51.50643,-0.12719;r=100&apiKey=LDqTvoCf_-jBLRKJaQgdldgPolbOf4Tj4cKM17Nt3BU";
@@ -20,7 +29,6 @@ class TrafficIncidentPage extends StatelessWidget {
     }
   }
 
-  Map<String, dynamic> map = {};
   Future<List<Incident>> fetchIncidents() async {
     final data = await fetchTrafficIncidentData();
     final List<dynamic> results = data['results'];
@@ -32,8 +40,35 @@ class TrafficIncidentPage extends StatelessWidget {
     final jsonString = jsonEncode(incidentMaps);
 
     print(jsonString);
-    return results.map((json) => Incident.fromJson(json)).toList();
+
+    getTrafficIncidentInformation(jsonString);
+
+    return incidents;
   }
+
+  Future<void> getTrafficIncidentInformation(String data) async {
+    if (map.containsKey('response')) {
+      return;
+    }
+    var response = await http.post(
+      Uri.parse('https://travelbot-summarizer.onrender.com/incidents'),
+      headers: {'Content-Type': 'application/json'},
+      body: data,
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      var text = responseBody['summary'];
+      print(text);
+      setState(() {
+        map['response'] = text;
+      });
+    } else {
+      print('Failed to fetch traffic information: ${response.statusCode}');
+    }
+  }
+
+  Map<String, dynamic> map = {};
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +85,8 @@ class TrafficIncidentPage extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             final incidents = snapshot.data!;
-            return IncidentDetailsPage(incidents: incidents);
+            return IncidentDetailsPage(
+                incidents: incidents, response: map['response']);
           }
         },
       ),
@@ -60,79 +96,41 @@ class TrafficIncidentPage extends StatelessWidget {
 
 class IncidentDetailsPage extends StatelessWidget {
   final List<Incident> incidents;
+  final String? response;
 
-  IncidentDetailsPage({required this.incidents});
+  IncidentDetailsPage({required this.incidents, this.response});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: incidents.length,
-        itemBuilder: (context, index) {
-          final incident = incidents[index];
-          return ListTile(
-            title: Text(incident.summary),
-            subtitle: Text(incident.description),
-            trailing: IntrinsicWidth(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Type: ${incident.type}'),
-                  Text('Criticality: ${incident.criticality}'),
-                  Text('Road Closed: ${incident.roadClosed ? "Yes" : "No"}'),
-                ],
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: incidents.length,
+              itemBuilder: (context, index) {
+                final incident = incidents[index];
+                return ListTile(
+                  title: Text(incident.summary),
+                  subtitle: Text(incident.description),
+                  trailing: IntrinsicWidth(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Type: ${incident.type}'),
+                        Text('Criticality: ${incident.criticality}'),
+                        Text(
+                            'Road Closed: ${incident.roadClosed ? "Yes" : "No"}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          if (response != null) Text('Response: $response'),
+        ],
       ),
     );
-  }
-}
-
-class Incident {
-  final String id;
-  final String description;
-  final String summary;
-  final String type;
-  final String criticality;
-  final bool roadClosed;
-  final DateTime startTime;
-  final DateTime endTime;
-
-  Incident({
-    required this.id,
-    required this.description,
-    required this.summary,
-    required this.type,
-    required this.criticality,
-    required this.roadClosed,
-    required this.startTime,
-    required this.endTime,
-  });
-
-  factory Incident.fromJson(Map<String, dynamic> json) {
-    return Incident(
-      id: json['incidentDetails']['id'],
-      description: json['incidentDetails']['description']['value'],
-      summary: json['incidentDetails']['summary']['value'],
-      type: json['incidentDetails']['type'],
-      criticality: json['incidentDetails']['criticality'],
-      roadClosed: json['incidentDetails']['roadClosed'],
-      startTime: DateTime.parse(json['incidentDetails']['startTime']),
-      endTime: DateTime.parse(json['incidentDetails']['endTime']),
-    );
-  }
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'description': description,
-      'summary': summary,
-      'type': type,
-      'criticality': criticality,
-      'roadClosed': roadClosed,
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime.toIso8601String(),
-    };
   }
 }
