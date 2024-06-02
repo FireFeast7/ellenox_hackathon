@@ -16,7 +16,7 @@ class SplashScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            "Travel Buddy",
+            "Travel Genie",
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
           ),
           const SizedBox(
@@ -32,7 +32,7 @@ class SplashScreen extends StatelessWidget {
             height: 30,
           ),
           const TextWithBgDeco(
-            text: "Travel Plan",
+            text: "Let's Explore",
           ),
           // Text(
           //   "Travel Plan",

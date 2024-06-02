@@ -1,6 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TrafficFlowPage extends StatefulWidget {
@@ -12,7 +16,7 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
   Map<dynamic, dynamic> map = {};
 
   Future<Map<String, dynamic>> fetchTrafficFlowData() async {
-    final String url =
+    const String url =
         "https://data.traffic.hereapi.com/v7/flow?locationReferencing=shape&in=circle:18.5204,73.8567;r=100&apiKey=LDqTvoCf_-jBLRKJaQgdldgPolbOf4Tj4cKM17Nt3BU";
     try {
       final response = await http.get(Uri.parse(url));
@@ -71,7 +75,6 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
     if (response.statusCode == 200) {
       var responseBody = jsonDecode(response.body);
       var text = responseBody['summary'];
-      print(text);
       setState(() {
         map['response'] = text;
       });
@@ -85,7 +88,7 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
     return Scaffold(
       backgroundColor: HexColor('#FEF9F4'),
       appBar: AppBar(
-        title: Text('Traffic Flow'),
+        title: const Text('Traffic Flow'),
         backgroundColor: HexColor('#FEF9F4'),
         centerTitle: true,
       ),
@@ -94,13 +97,12 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
           future: fetchTrafficFlowData(),
           builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
               final Map<String, dynamic> trafficData = snapshot.data!;
               final List<dynamic> results = trafficData['results'];
-              final int numberOfResults = results.length;
               double avgSpeed = calculateAverage(results, 'speed');
               double avgSpeedUncapped =
                   calculateAverage(results, 'speedUncapped');
@@ -113,19 +115,124 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                      'Average Speed: ${(avgSpeed * 3.6).toStringAsFixed(2)} km/h'),
-                  Text(
-                      'Average Speed (Uncapped): ${(avgSpeedUncapped * 3.6).toStringAsFixed(2)} km/h'),
-                  Text(
-                      'Average Free Flow: ${(avgFreeFlow * 3.6).toStringAsFixed(2)} km/h'),
-                  Text(
-                      'Average Jam Factor: ${avgJamFactor.toStringAsFixed(2)}'),
-                  Text(
-                      'Average Confidence: ${avgConfidence.toStringAsFixed(2)}'),
-                  Text('Mode Traversability: $modeTraversability'),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.175,
+                    child: Image.asset('assets/images/traffic.gif',
+                        fit: BoxFit.cover),
+                  ),
+                  const SizedBox(height: 20),
+                  DataTable(
+                    columns: <DataColumn>[
+                      DataColumn(
+                        label: Container(
+                          color: Colors.black,
+                          padding: const EdgeInsets.all(8.0),
+                          child: const Text(
+                            'Attribute',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Container(
+                          color: Colors.black, // Apply color to the header
+                          padding: const EdgeInsets.all(8.0),
+                          child: const Text(
+                            'Value',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: <DataRow>[
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Average Speed')),
+                          DataCell(Text(
+                              '${(avgSpeed * 3.6).toStringAsFixed(2)} km/h')),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#B6E0FF')), 
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Average Speed (Uncapped)')),
+                          DataCell(Text(
+                              '${(avgSpeedUncapped * 3.6).toStringAsFixed(2)} km/h')),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#ECC5FF')), 
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Average Free Flow')),
+                          DataCell(Text(
+                              '${(avgFreeFlow * 3.6).toStringAsFixed(2)} km/h')),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#B6E0FF')), 
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Average Jam Factor')),
+                          DataCell(Text(avgJamFactor.toStringAsFixed(2))),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#ECC5FF')), 
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Average Confidence')),
+                          DataCell(Text(avgConfidence.toStringAsFixed(2))),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#B6E0FF')), 
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Mode Traversability')),
+                          DataCell(Text(modeTraversability)),
+                        ],
+                        color: WidgetStateProperty.all(HexColor('#ECC5FF')),
+                      ),
+                      DataRow(
+                        cells: [
+                          DataCell(Text('Best Time to Leave')),
+                          DataCell(Text('7:00 AM')),
+                        ],
+                        color: WidgetStateProperty.all(
+                            HexColor('#B6E0FF')), 
+                      ),
+                    ],
+                  ),
                   if (map.containsKey('response'))
-                    Text('Response: ${map['response']}'),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: HexColor('#D0F065'),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.black),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Traffic Summary',
+                              style: TextStyle(
+                                fontSize: 18.0, // Adjust font size as needed
+                                fontWeight:
+                                    FontWeight.bold, // Make it bold for heading
+                              ),
+                            ),
+                            Text(
+                              map['response'],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               );
             }

@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class TrafficIncidentPage extends StatefulWidget {
   @override
@@ -76,8 +73,9 @@ class _TrafficIncidentPageState extends State<TrafficIncidentPage> {
     return Scaffold(
       backgroundColor: HexColor('#FEF9F4'),
       appBar: AppBar(
-      backgroundColor: HexColor('#FEF9F4'),
-        title: Text('Traffic Incidents'),
+        title: Text(
+          'Traffic Incidents',
+        ),
         centerTitle: true,
       ),
       body: FutureBuilder<List<Incident>>(
@@ -109,30 +107,74 @@ class IncidentDetailsPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.2,
+            child: Image.asset('assets/images/incident.gif', fit: BoxFit.cover),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: incidents.length,
               itemBuilder: (context, index) {
                 final incident = incidents[index];
-                return ListTile(
-                  title: Text(incident.summary),
-                  subtitle: Text(incident.description),
-                  trailing: IntrinsicWidth(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Type: ${incident.type}'),
-                        Text('Criticality: ${incident.criticality}'),
-                        Text(
-                            'Road Closed: ${incident.roadClosed ? "Yes" : "No"}'),
-                      ],
-                    ),
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: HexColor('#B6E0FF'),
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: HexColor('#ECC5FF')),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        incident.summary,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(incident.description),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Type: ${incident.type}'),
+                          Text('Criticality: ${incident.criticality}'),
+                          Text(
+                              'Road Closed: ${incident.roadClosed ? "Yes" : "No"}'),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ),
-          if (response != null) Text('Response: $response'),
+          if (response != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: HexColor('#D0F065'),
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(color: HexColor('#ECC5FF')),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Incidents Summary',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      response!,
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

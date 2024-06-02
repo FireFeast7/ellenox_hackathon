@@ -20,6 +20,7 @@ class _HomeState extends State<Home> {
   bool showButtons = false;
   List<double> coordinates = [];
   String cityName = '';
+  String cityInfo = '';
 
   @override
   void initState() {
@@ -40,7 +41,7 @@ class _HomeState extends State<Home> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 50, 0),
             child: Text(
-              'Chat Bot',
+              'Travel Buddy',
               style: TextStyle(color: HexColor('#343434')),
             ),
           ),
@@ -53,7 +54,7 @@ class _HomeState extends State<Home> {
               child: Body(
                 messages: messages,
                 showButtons: showButtons,
-                coordinates: coordinates, // Pass showButtons state here
+                coordinates: coordinates,
               ),
             ),
             Container(
@@ -170,9 +171,17 @@ class _HomeState extends State<Home> {
         }
       } else {
         print(response.body);
+
+        var resultString = responseBody['result'][1];
+        var cityInfoMatches =
+            RegExp(r'\"Type_3\", \"(.*?)\"').allMatches(resultString);
+        if (cityInfoMatches.isNotEmpty) {
+          cityInfo = cityInfoMatches.first.group(1)!;
+          cityInfo = cityInfo.replaceAll(r'\n', '\n');
+        }
         setState(() {
           addMessage({
-            'text': response.body,
+            'text': cityInfo.isNotEmpty ? cityInfo : 'No information available',
             'isUserMessage': false,
           });
         });
