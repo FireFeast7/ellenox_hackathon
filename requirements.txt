@@ -1,0 +1,9 @@
+google-generativeai
+uvicorn
+httplib2==0.22.0
+gunicorn==22.0.0
+fastapi
+python-dotenv
+python-multipart
+requests
+pydantic
