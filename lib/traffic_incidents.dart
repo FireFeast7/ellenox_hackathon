@@ -1,5 +1,6 @@
 import 'package:ellenox_hackathon/incident_model.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -73,8 +74,11 @@ class _TrafficIncidentPageState extends State<TrafficIncidentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: HexColor('#FEF9F4'),
       appBar: AppBar(
+      backgroundColor: HexColor('#FEF9F4'),
         title: Text('Traffic Incidents'),
+        centerTitle: true,
       ),
       body: FutureBuilder<List<Incident>>(
         future: fetchIncidents(),

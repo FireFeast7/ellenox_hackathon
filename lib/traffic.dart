@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
 class TrafficFlowPage extends StatefulWidget {
@@ -82,8 +83,11 @@ class _TrafficFlowPageState extends State<TrafficFlowPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: HexColor('#FEF9F4'),
       appBar: AppBar(
         title: Text('Traffic Flow'),
+        backgroundColor: HexColor('#FEF9F4'),
+        centerTitle: true,
       ),
       body: Center(
         child: FutureBuilder(

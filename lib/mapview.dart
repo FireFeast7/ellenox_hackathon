@@ -69,6 +69,7 @@ class _RouteMapState extends State<RouteMap> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Route Map'),
+        centerTitle: true,
       ),
       body: FutureBuilder(
         future: _routeCoordinatesFuture,
@@ -105,8 +106,8 @@ class _RouteMapState extends State<RouteMap> {
                       points: routeCoordinates
                           .map((coord) => LatLng(coord[0], coord[1]))
                           .toList(),
-                      color: Colors.black, 
-                      strokeWidth: 2.0, 
+                      color: Colors.black,
+                      strokeWidth: 2.0,
                     ),
                   ],
                 )

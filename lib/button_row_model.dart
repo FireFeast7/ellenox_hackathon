@@ -2,6 +2,7 @@ import 'package:ellenox_hackathon/mapview.dart';
 import 'package:ellenox_hackathon/traffic.dart';
 import 'package:ellenox_hackathon/traffic_incidents.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class ButtonRow extends StatelessWidget {
   final List<double> coordinates;
@@ -16,6 +17,9 @@ class ButtonRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: HexColor('#ECC5FF'),
+            ),
             onPressed: () {
               print(coordinates);
               Navigator.of(context).push(
@@ -28,18 +32,22 @@ class ButtonRow extends StatelessWidget {
           ),
           SizedBox(width: 10),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: HexColor('#ECC5FF'),
+            ),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TrafficFlowPage()));
+                  MaterialPageRoute(builder: (context) => TrafficFlowPage()));
             },
             child: Text('Get Traffic Information'),
           ),
           SizedBox(width: 10),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: HexColor('#ECC5FF'),
+            ),
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
+              Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => TrafficIncidentPage()));
             },
             child: Text('Get Incidents Information'),

@@ -30,21 +30,19 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     var themeValue = MediaQuery.of(context).platformBrightness;
+
     return Scaffold(
-      backgroundColor: themeValue == Brightness.dark
-          ? HexColor('#262626')
-          : HexColor('#FFFFFF'),
+      backgroundColor: HexColor('#FEF9F4'),
       appBar: AppBar(
-        backgroundColor: themeValue == Brightness.dark
-            ? HexColor('#3C3A3A')
-            : HexColor('#BFBFBF'),
+        backgroundColor: HexColor('#FEF9F4'),
+        centerTitle: true,
         title: Center(
-          child: Text(
-            'Chat Bot',
-            style: TextStyle(
-                color: themeValue == Brightness.dark
-                    ? Colors.white
-                    : Colors.black),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 50, 0),
+            child: Text(
+              'Chat Bot',
+              style: TextStyle(color: HexColor('#343434')),
+            ),
           ),
         ),
       ),
@@ -68,37 +66,24 @@ class _HomeState extends State<Home> {
                   Expanded(
                     child: TextFormField(
                       controller: messageController,
-                      style: TextStyle(
-                          color: themeValue == Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
-                          fontFamily: 'Poppins'),
+                      style:
+                          TextStyle(color: Colors.black, fontFamily: 'Poppins'),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: themeValue == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black),
+                            borderSide: BorderSide(color: Colors.black),
                             borderRadius: BorderRadius.circular(15)),
                         hintStyle: TextStyle(
-                          color: themeValue == Brightness.dark
-                              ? Colors.white54
-                              : Colors.black54,
+                          color: Colors.black54,
                           fontSize: 15,
                           fontStyle: FontStyle.italic,
                         ),
-                        labelStyle: TextStyle(
-                            color: themeValue == Brightness.dark
-                                ? Colors.white
-                                : Colors.black),
+                        labelStyle: TextStyle(color: Colors.black),
                         hintText: 'Send a message',
                       ),
                     ),
                   ),
                   IconButton(
-                    color: themeValue == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
+                    color: Colors.black,
                     icon: Icon(Icons.send),
                     onPressed: () {
                       sendMessage(messageController.text);
@@ -113,9 +98,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-   
-
-
 
   void sendMessage(String text) async {
     if (text.isEmpty) return;
@@ -141,24 +123,23 @@ class _HomeState extends State<Home> {
       var responseBody = jsonDecode(response.body);
       var resultCode = responseBody['result'][0];
       if (resultCode == 1) {
-      var resultString = responseBody['result'][1];
-      var cityMatches = RegExp(r'\"null\", \"(.*?)\"').allMatches(resultString);
-      if (cityMatches.isNotEmpty) {
-        cityName = cityMatches.first.group(1)!;
-            coordinates = responseBody['result'][2].cast<double>();
+        var resultString = responseBody['result'][1];
+        var cityMatches =
+            RegExp(r'\"null\", \"(.*?)\"').allMatches(resultString);
+        if (cityMatches.isNotEmpty) {
+          cityName = cityMatches.first.group(1)!;
+          coordinates = responseBody['result'][2].cast<double>();
 
-    setState(() {
-          addMessage({
-            'text':
-                'These are the results that I found for your query to travel to $cityName ',
-            'isUserMessage': false,
+          setState(() {
+            addMessage({
+              'text':
+                  'These are the results that I found for your query to travel to $cityName ',
+              'isUserMessage': false,
+            });
+            showButtons = true;
           });
-          showButtons = true;
-        });
-  }
-}
-
-      else if (resultCode == 2) {
+        }
+      } else if (resultCode == 2) {
         var weatherData = WeatherData.fromJson(responseBody['result'][2]);
         setState(() {
           addMessage({
@@ -191,11 +172,9 @@ class _HomeState extends State<Home> {
         print(response.body);
         setState(() {
           addMessage({
-            'text':
-                response.body,
+            'text': response.body,
             'isUserMessage': false,
           });
-
         });
       }
     } else {
@@ -204,10 +183,6 @@ class _HomeState extends State<Home> {
   }
 
   String formatWeatherData(WeatherData weatherData) {
-    
-
-    
-
     final Map<String, dynamic> formattedData = {
       'City': weatherData.cityName,
       'Temperature': '${formatTemperature(weatherData.temp)} °C',
@@ -250,16 +225,18 @@ class _HomeState extends State<Home> {
     ''';
   }
 
-String formatTemperature(double value) {
-      return (value - 273.15).toStringAsFixed(2);
-    }
-    String formatTime(int timestamp) {
-      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)
-          .toLocal()
-          .toIso8601String()
-          .split('T')[1]
-          .substring(0, 5);
-    }
+  String formatTemperature(double value) {
+    return (value - 273.15).toStringAsFixed(2);
+  }
+
+  String formatTime(int timestamp) {
+    return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)
+        .toLocal()
+        .toIso8601String()
+        .split('T')[1]
+        .substring(0, 5);
+  }
+
   String formatWeatherDataAsJsonString(WeatherData weatherData) {
     final Map<String, dynamic> formattedData = {
       'City': weatherData.cityName,
@@ -346,7 +323,6 @@ class _BodyState extends State<Body> {
         if (widget.showButtons)
           ButtonRow(
             coordinates: widget.coordinates,
-            
           ),
       ],
     );

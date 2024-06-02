@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class MessageContainer extends StatelessWidget {
   final String text;
@@ -22,7 +23,7 @@ class MessageContainer extends StatelessWidget {
         builder: (context, constrains) {
           return Container(
             decoration: BoxDecoration(
-              color: isUserMessage ? Colors.blue : Colors.grey[300],
+              color: isUserMessage ? HexColor('#D0F065') : HexColor('#B6E0FF'),
               borderRadius: BorderRadius.circular(10),
             ),
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
