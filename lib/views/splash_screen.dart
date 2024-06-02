@@ -1,8 +1,8 @@
-import 'package:ellenox_hackathon/chatbot.dart';
+import 'package:ellenox_hackathon/views/chatbot.dart';
 import 'package:ellenox_hackathon/constants/colors.dart';
 import 'package:ellenox_hackathon/constants/images.dart';
-import 'package:ellenox_hackathon/text_with_bg_deco.dart';
-import 'package:ellenox_hackathon/utils.dart';
+import 'package:ellenox_hackathon/models/text_with_bg_deco.dart';
+import 'package:ellenox_hackathon/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {

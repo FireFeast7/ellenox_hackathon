@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../constants/colors.dart';
-import '../../constants/images.dart';
+import '../../../constants/colors.dart';
+import '../../../constants/images.dart';
 
 class CustomAppBar extends StatefulWidget {
   const CustomAppBar({super.key});

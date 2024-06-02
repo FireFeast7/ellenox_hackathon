@@ -1,7 +1,7 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
 
-import 'package:ellenox_hackathon/splash_screen.dart';
+import 'package:ellenox_hackathon/views/splash_screen.dart';
 
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,6 @@
-import 'package:ellenox_hackathon/mapview.dart';
-import 'package:ellenox_hackathon/traffic.dart';
-import 'package:ellenox_hackathon/traffic_incidents.dart';
+import 'package:ellenox_hackathon/views/mapview.dart';
+import 'package:ellenox_hackathon/views/traffic.dart';
+import 'package:ellenox_hackathon/views/traffic_incidents.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:ellenox_hackathon/button_row_model.dart';
-import 'package:ellenox_hackathon/currentLocation.dart';
-import 'package:ellenox_hackathon/message_container_model.dart';
+import 'package:ellenox_hackathon/models/button_row_model.dart';
+import 'package:ellenox_hackathon/views/currentLocation.dart';
+import 'package:ellenox_hackathon/models/message_container_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
-import 'weather_model.dart';
+import '../models/weather_model.dart';
 
 class Home extends StatefulWidget {
   @override
